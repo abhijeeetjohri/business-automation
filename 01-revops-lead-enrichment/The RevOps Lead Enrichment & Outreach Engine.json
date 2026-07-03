@@ -1,0 +1,172 @@
+{
+  "name": "The RevOps Lead Enrichment & Outreach Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://dummyjson.com/users/search?q=https://dummyjson.com/users/search?q={{ $json.body.email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -144,
+        -80
+      ],
+      "id": "b6bcf555-eb36-4d1c-a9d7-5155559527cd",
+      "name": "Enrich Lead Data"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "44608976-ad73-436e-b0fd-9389b3bd27f6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1IoIjFD0BzB78z3a",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Write a 2-sentence cold outreach email to {{$node[\"Catch Inbound Lead\"].json.body.name}} Extract the company name from the domain of this email address: {{ $node[\"Catch Inbound Lead\"].json.body.email }} (for example, if the domain is @stripe.com, the company is Stripe). Explicitly mention that specific company name in the email. Keep it highly casual."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "08b09df6-f9db-4bc7-b379-2a69851fa723",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "1IoIjFD0BzB78z3a",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-lead",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -352,
+        -80
+      ],
+      "id": "e0e84a13-864e-4ac5-b8ce-4f9713e13cb6",
+      "name": "Catch Inbound Lead",
+      "webhookId": "6910df8e-0c91-4b00-9c82-fc7d3c6c845d"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Quick question for you!",
+        "message": "={{ $json.output[0].content[0].text }}",
+        "options": {
+          "sendTo": "={{ $('Catch Inbound Lead').item.json.body.email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        -80
+      ],
+      "id": "6b900faf-21bf-4b61-bbcc-2a6b65b8fc0c",
+      "name": "Create a draft",
+      "webhookId": "86ddb6b7-3b8b-466f-b270-c77c349bb313",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rYDY2JIWH6BfemGl",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Enrich Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Catch Inbound Lead": {
+      "main": [
+        [
+          {
+            "node": "Enrich Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "302e3d9b-7dac-40d7-b9b7-d925585d206d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3f0253a20ab87574c0ff48f67d432ad0c5de99ae68eb1050fc03d82b301d136"
+  },
+  "nodeGroups": [],
+  "id": "oHd343mjiJgAP6Fz",
+  "tags": []
+}
