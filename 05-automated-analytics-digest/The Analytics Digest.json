@@ -1,0 +1,100 @@
+{
+  "name": "The Analytics Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "66fcacab-d253-4e25-9ebb-9d50fd4e158d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "64eda47c-c25d-4cbb-85de-682528a0f170",
+      "name": "Lead Batch Receiver",
+      "webhookId": "66fcacab-d253-4e25-9ebb-9d50fd4e158d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the array of leads safely\n// We check the root, or if the data is wrapped inside 'body'\nconst input = items[0].json;\nconst leads = input.leads || (input.body && input.body.leads) || [];\n\n// Safety check: Did we actually get any leads?\nif (leads.length === 0) {\n  return {\n    json: {\n      summary: \"No leads found in this batch.\",\n      total_revenue: \"$0\",\n      lead_names: \"None\"\n    }\n  };\n}\n\n// 2. Filter out bad data (e.g., leads with 0 value)\nconst validLeads = leads.filter(lead => lead.value > 0);\n\n// 3. Count how many leads we have\nconst totalCount = validLeads.length;\n\n// 4. Calculate total value using reduce\nconst totalValue = validLeads.reduce((sum, lead) => sum + lead.value, 0);\n\n// 5. Create a clean list of names\nconst namesList = validLeads.map(lead => lead.name).join(\", \");\n\n// 6. Return a single summary object\nreturn {\n  json: {\n    summary: `Daily Digest: ${totalCount} new qualified leads today!`,\n    total_revenue: `$${totalValue}`,\n    lead_names: namesList\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ddb1582a-d97d-452f-93ee-dfa11bb41c4b",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U0BBNDVQCJX",
+          "mode": "list",
+          "cachedResultName": "jaipurvacationers"
+        },
+        "text": "=Summary: {{ $json.summary }}\n\nTotal Revenue: {{ $json.total_revenue }}\n\nLeads: {{ $json.lead_names }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        416,
+        0
+      ],
+      "id": "48796d77-dbc4-46a6-9674-d2636d25b323",
+      "name": "Send a message",
+      "webhookId": "8a36957c-c096-4810-ad63-f37c4ae0af9c",
+      "credentials": {
+        "slackApi": {
+          "id": "XTs98CHLjSvXE2mT",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Batch Receiver": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "91a5302e-09cc-4148-91ee-bfa12cd19bf7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3f0253a20ab87574c0ff48f67d432ad0c5de99ae68eb1050fc03d82b301d136"
+  },
+  "nodeGroups": [],
+  "id": "DqubVO5gMzXhm9Go",
+  "tags": []
+}
