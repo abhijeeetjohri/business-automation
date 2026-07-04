@@ -1,0 +1,120 @@
+{
+  "name": "The Billing & Sync Error Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c711cea2-51e4-4f1a-80d2-763471994146",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "69f6af4c-30c9-40e1-b225-902c21f5aa63",
+      "name": "Catch Sync Failure",
+      "webhookId": "c711cea2-51e4-4f1a-80d2-763471994146"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8759903e-f3e4-4dd8-a1dc-f27d9bc04feb",
+              "leftValue": "={{ $json.body.status }}",
+              "rightValue": "failed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "195cbbb1-6405-4b6a-a02e-39d2a40c59c5",
+      "name": "Is Failure?"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U0BBNDVQCJX",
+          "mode": "list",
+          "cachedResultName": "jaipurvacationers"
+        },
+        "text": "=🚨 *URGENT: Billing Sync Failure*  *Transaction ID:* {{ $node[\"Catch Sync Failure\"].json.body.transaction_id }} *Customer ID:* {{ $node[\"Catch Sync Failure\"].json.body.customer_id }} *Error Detail:* {{ $node[\"Catch Sync Failure\"].json.body.error_code }}  Action Required: Check customer profile immediately.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "5a3cfc10-51ee-40b5-a32b-caf599d41e92",
+      "name": "Alert Billing Team",
+      "webhookId": "a47cf327-9db0-42ed-8810-8a6fac50a29d",
+      "credentials": {
+        "slackApi": {
+          "id": "XTs98CHLjSvXE2mT",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Catch Sync Failure": {
+      "main": [
+        [
+          {
+            "node": "Is Failure?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Failure?": {
+      "main": [
+        [
+          {
+            "node": "Alert Billing Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6316cf52-dc98-43c9-a55f-13f3fcd49c3c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3f0253a20ab87574c0ff48f67d432ad0c5de99ae68eb1050fc03d82b301d136"
+  },
+  "nodeGroups": [],
+  "id": "TOHZELR0r19V7VcU",
+  "tags": []
+}
