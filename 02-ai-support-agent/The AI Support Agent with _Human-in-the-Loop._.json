@@ -1,0 +1,160 @@
+{
+  "name": "The AI Support Agent with \"Human-in-the-Loop.\"",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0c2aad33-38ec-4653-be99-14f33f1cc822",
+      "name": "Catch Support Ticket",
+      "webhookId": "65474df8-aee8-4c53-adb1-7b1084df99b3"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a helpful customer support agent. The customer is asking: {{ $node [\"Catch Support Ticket\"].json.body.question }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "091032fe-ae4d-41f9-9bab-34ce8ed1ccea",
+      "name": "Draft Support Response",
+      "credentials": {
+        "openAiApi": {
+          "id": "1IoIjFD0BzB78z3a",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U0BBNDVQCJX",
+          "mode": "list",
+          "cachedResultName": "jaipurvacationers"
+        },
+        "text": "=🚨 New Support Ticket Received!\n\nCustomer Email: {{ $('Catch Support Ticket').item.json.body.customer_email }}\n\nAI Draft: \n{{ $json.output[0].content[0].text }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        544,
+        -144
+      ],
+      "id": "f47eeb28-cd0b-45d1-9bdc-acdaa8946111",
+      "name": "Send a message",
+      "webhookId": "b3f22f40-0f41-4569-a77d-ed0369b4b898",
+      "credentials": {
+        "slackApi": {
+          "id": "XTs98CHLjSvXE2mT",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Catch Support Ticket": [
+      {
+        "json": {
+          "headers": {
+            "host": "thinkwith.app.n8n.cloud",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36",
+            "content-length": "136",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "64.227.21.251",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "a16080bfbbcff812-EWR",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "64.227.21.251, 172.70.111.111",
+            "x-forwarded-host": "thinkwith.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-swc-5-76c9d77478-xkqvh",
+            "x-is-trusted": "yes",
+            "x-real-ip": "64.227.21.251"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "customer_email": "jane@example.com",
+            "question": "I haven't received my order yet, it's been 5 days. Can you help?"
+          },
+          "webhookUrl": "https://thinkwith.app.n8n.cloud/webhook-test/support-ticket",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Catch Support Ticket": {
+      "main": [
+        [
+          {
+            "node": "Draft Support Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Support Response": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "196cb1e2-3850-42fc-84f7-413bbc774a49",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a3f0253a20ab87574c0ff48f67d432ad0c5de99ae68eb1050fc03d82b301d136"
+  },
+  "nodeGroups": [],
+  "id": "FNCuZ36ttIO6e4uc",
+  "tags": []
+}
